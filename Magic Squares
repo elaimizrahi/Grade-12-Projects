@@ -1,0 +1,127 @@
+/**
+ * @author Elai
+ */
+
+import java.util.Arrays;
+
+public class Main {
+    
+  /**
+   * Takes a 2-dimensional array of integers and determines whether it is a magic square.
+   *
+   * @param matrix
+   * @return boolean
+   */
+  public static boolean isMagicSquare(int[][] matrix) {
+
+    //To start we have to make sure that the matrix is a perfect square
+    int rowCount = matrix.length;
+    int columnCount = 0;
+    int n = matrix.length;
+    //This initializes some variables for later, including the length of the row and n
+
+    //Starts a for loop that checks the length of each column, compares it to the row length
+    //Will return false if not a perfect square
+    for (int i = 0; i < matrix.length; i++){
+      columnCount = matrix[i].length;
+      if (rowCount != columnCount){
+        return false;
+      }
+    }
+
+    //Next we are checking the sums of the diagonals, each row, and each column
+    //These variables are created to have the sum of the diagonal going from the top left to bottom right, and one for the diagonal from top right to bottom left
+    int firstDiagonalCount = 0;
+    int secondDiagonalCount = 0;
+
+    //This for loop adds up the two all in one, returning the sum of each
+    for (int i = 0; i < n; i++){
+      for (int j = 0; j < n; j++){
+
+        //This if statement checks if the two are equal, which means that it will be the matrix going from top left to bottom right
+        if (i == j){
+          firstDiagonalCount += matrix[i][j];
+        }
+
+        //This if statement does the opposite, will check the other diagonal
+        if ((i+j) == (n-1)){
+          secondDiagonalCount += matrix[i][j];          
+        }
+      }
+    }
+    
+    //checks that the diagonals have equal sums, if not, will return false
+    if(firstDiagonalCount != secondDiagonalCount){
+      return false;
+    }
+
+    int diagonalCount = firstDiagonalCount;
+    //Assigns the new variable diagonalCount, just makes it easier to follow later on. Because both diagonals will have the same sum, we just assign it to be the same as the first's sum.
+
+    //Checks that each row adds up to the same as diagonals
+    for (int i = 0; i < n; i++){
+      //Assigns new variable that will check sum of each row to be compared
+      int rowValue = 0;
+      for (int j = 0; j < n; j++){
+        rowValue += matrix[i][j];
+        //Goes across the row, adding each integer to the total. Similar 1D array for loops, just with two variables this time. 
+      } 
+      //If the sums do not match, return false
+      if (rowValue != diagonalCount){
+        return false;
+      }
+    }
+
+    //Checks that each column adds up to the same as diagonals
+    for (int i = 0; i < n; i++){
+      //Assigns columnValue variable that will contain the sum of each column
+      int columnValue = 0;
+      for (int j = 0; j < n; j++){
+        columnValue += matrix[j][i];
+        //Does the same for loop as above, but the i and j are flipped. This means that instead of going [1][2], [1][3], it will go [2][1], [3][1], down each column
+      }      
+      //If the sums do not match, returns false
+      if (columnValue != diagonalCount){
+        return false;
+      }
+    }
+    
+    //This final section checks if each number between 1 and n is in the matrix
+
+    //This for loop gives the sum of every number from 1 to n. For example, if n=7, sum = 28
+    int sum = 0;
+    for (int i = 1; i <= n*n; i++) {
+        sum += i;
+    }
+
+    //This for loop gets the total sum of every integer in the matrix
+    int totalValue = 0;
+    for (int i = 0; i < n; i++){
+      for (int j = 0; j < n; j++){
+        totalValue += matrix[j][i];
+      }
+    }
+
+    //If they are not equal, then there can not be every integer from 1 to n in the matrix, so it returns false
+    if (sum != totalValue){
+      return false;
+    }
+
+    //If the program hasn't returned false at this point, the matrix must be a magic square, so we can return true
+    return true;
+  }
+      
+  /**
+   * @param args the command line arguments
+   * @return void
+   */
+  public static void main(String[] args) {
+    /*
+     * Runs the twelve pre-made tests.
+     *
+     * You can comment out the line below out if you don't want these tests to run.
+     */
+    
+    UnitTests.runTests();
+  }   
+}
