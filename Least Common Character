@@ -1,0 +1,121 @@
+/**
+ *
+ * @author Elai
+ */
+import java.util.Arrays;
+
+public class Main {
+  
+  /**
+   * This method takes a string and returns the least common character in it.
+   *
+   * If there is a tie, it returns the one at the highest index.
+   *
+   * If the string is empty, it returns the character with ASCII value 0.
+   *
+   * @param s 
+   * @return char
+   */
+
+  //Open up the new function, takes in a string (s) and will return the least common character
+  public static char leastCommonChar(String s) {
+
+    //Create a new array that is the same length as the string
+    char array [] = new char[s.length()];
+
+    //This for loop will run through each character in the string, putting each one into the array in order ("abcdef" would become ['a', 'b', 'c', 'd', 'e', 'f'])
+    for (int i=0; i<s.length(); i++){
+      array[i] = s.charAt(i);
+    }
+
+    //prints out the string, this serves no purpose but helps the user read the output, tells what string is being analyzed for the least common character
+    System.out.println(s);
+
+    /*lowestCharacterCount is given the highest possible number for a 32-bit program. 
+     * This makes it easy to replace it with the lowest number count.
+     * It will also continue to do so if another is found later on in the string.
+    */
+    int lowestCharacterCount = 2147483647;
+    char character = 0;
+    int asciiValue = 0;      
+    //Initalizes three variables, which will be used later on.
+
+    
+    //Begins a for loop that will run for each index in the array, checking how often it appears.
+    for (int i = 0; i < array.length; i++){
+      int characterCount = 0;
+      int newAscii = array[i];
+      char c = array[i];    
+      //Initialize characterCount, which will reset each time. Also newAscii, which is used to find the character with the highest ascii value later on. c is going to be used in the nested if statements.
+      
+
+      //This for loop will add one to character count every time that a character is found in the array. It does this by taking the character from the first for loop, and comparing it to every character in the array. 
+      //Note: We need to use k the same way as i in this case, because i is already used. 
+      for (int k = 0; k < array.length; k++){
+        if (array[k] == c){
+          characterCount++;
+        }
+      }
+
+      //This if statement checks if the current character appears less than a previous one. If so, then it will replace the values below with the current characters values
+      if (characterCount < lowestCharacterCount){
+        newAscii = array[i];
+        lowestCharacterCount = characterCount;
+        character = array[i];
+        asciiValue = character;
+      }
+
+      //checks if the two characters have the same character count and compares their ascii values to get the one with the higher ascii value. It will make the newAscii value into the asciiValue, which is the variable that is returned.
+      if(characterCount == lowestCharacterCount){
+        
+        if (newAscii > asciiValue){
+          asciiValue = newAscii;
+        }
+      }
+    }
+      
+    
+    //If the string is blank, we need to return an ascii value of 0, so this checks the length and does so if the length is 0. Just an extra condition that we account for.
+    if(s.length() == 0){
+      lowestCharacterCount = 0;
+      asciiValue = 0;
+      character = (char)asciiValue;
+    }    
+
+    //I added a line that prints the integer ascii value, just so that you can see what is being returned. I originally did not have this becuase I thought it was messy, but to make things easy I threw it in.     
+    System.out.println("The ascii value is: " + asciiValue);
+    
+    //Finally, this is returned, which takes uses the ascii value of the least common character and returns that character to be printed.
+    return (char)asciiValue;
+  }
+
+
+
+  
+  
+  /**
+   * @param args the command line arguments
+   * @return void
+   */
+  public static void main(String[] args) {
+
+    //Here is where we will call upon the leastCommonChar method that was created
+    //We can put in the desired string, and there is some extra formatting to make it readable on the console
+
+    System.out.println("The least common character is: " + leastCommonChar("!!!!aaaa") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("ABBCCCDDDDEEEE") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("the turtle was green") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("44449999999993331666666") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("!    !") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("") + "\n");
+    
+    System.out.println("The least common character is: " + leastCommonChar("\\\\!@#$%^&*()`{}|::<>?./;'[]=-098765432.   1/!@#$!@#@#'") + "\n");
+    
+        System.out.println("The least common character is: " + leastCommonChar("I HATE VESPR THEORY") + "\n"); 
+  }
+}
