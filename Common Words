@@ -1,0 +1,117 @@
+/**
+ * @author Elai
+ */
+ 
+import java.io.*; 
+import java.util.Scanner;
+import java.util.Arrays; 
+
+public class Main {
+  // *commonWordsArray* will store the 5000 words in alphabetical order
+  public static String[] commonWordsArray = new String[5000];
+
+  /**
+   * Puts each token from the file into commonWordsArray.
+   * 
+   * @throws java.io.IOException
+   */
+  public static void generateCommonWordsArray() throws IOException {
+    try {
+      File file = new File("words.txt");
+      Scanner scanner = new Scanner(file);
+      // Keeps track of the indices from 0 to 4999
+      int index = 0;
+
+      while (scanner.hasNext()) {
+        // Adds each word to *commonWordsArray*
+        commonWordsArray[index] = scanner.next();
+        index++;
+      }
+      
+      // Closes the scanner for good housekeeping
+      scanner.close();
+    } catch (IOException exception) {
+      System.out.println("Something is wrong with the file.");
+    }
+  }
+
+  /**
+   * Takes a string and indicates whether it is in the
+   * array commonWordsArray. 
+   * 
+   * Words are not case-sensitive (i.e. capitalization doesn't matter).
+   * 
+   * Uses a binary search algorithm for efficiency.
+   * 
+   * @param word 
+   * @return boolean
+  */
+  public static boolean isCommonWord(String word) {
+    
+    //First we need to initialize an upper and lower bound, along with converting our word to lower case
+    word = word.toLowerCase();
+    int lowerBound = 0;
+    int upperBound = commonWordsArray.length-1;
+    int middleBound = (upperBound)/2;
+    //The middle bound will be the index that we check
+    //We want integers so that they can be easily manipulater later on
+
+    //Begins while loop that runs all the time while the lower and upper bounds are not equal, allows us to have a loop that will not continue forever
+    while(lowerBound != upperBound){
+
+      //Checks if the word at a lower index than the middle bound, if so, changes the upper bound to the middle bound and starts over
+      if (word.compareTo(commonWordsArray[middleBound]) < 0){            
+        upperBound = middleBound;        
+        middleBound = (upperBound + lowerBound)/2;
+      }
+
+      //If the word is the same as the middle bound, we have found the item and can return true because it is in the file
+      if (word.compareTo(commonWordsArray[middleBound]) == 0){
+        return true;
+      }
+
+      //If the word is at a higher index than the middle bound, changes lowerBound to middle bound and starts over, checking the top half of the original upper and lower bounds
+      if (word.compareTo(commonWordsArray[middleBound]) > 0){            
+        lowerBound = middleBound;        
+        middleBound = (upperBound + lowerBound)/2;
+      }    
+
+      //Finally, if the bounds are equal then we know that there is only one index between the bounds, which means that we can check to see if it is the right word. If so, returns true, if not, then breaks the loop and returns false
+      if(lowerBound == middleBound){
+        if(word.compareTo(commonWordsArray[lowerBound]) == 0){
+          return true;
+        }
+        else{
+          break;
+        }
+      }
+    }
+    return false;
+  }
+    
+  /**
+   * 
+   * @param args the command line arguments
+   */
+  public static void main(String[] args) {
+    try {
+      generateCommonWordsArray();
+
+      //Test cases
+      System.out.println(isCommonWord("the"));
+      System.out.println(isCommonWord("no"));
+      System.out.println(isCommonWord("blasphemous"));
+      System.out.println(isCommonWord("hippo"));
+      System.out.println(isCommonWord(" "));
+      System.out.println(isCommonWord("-#@"));
+      System.out.println(isCommonWord("copies"));
+      System.out.println(isCommonWord("po"));
+      System.out.println(isCommonWord("HELLO"));
+      System.out.println(isCommonWord("flY"));
+
+          
+    } catch (IOException exception) {
+      System.out.println("Something is wrong with the file.");
+    }
+  }
+}
