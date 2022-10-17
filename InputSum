@@ -1,0 +1,71 @@
+/**
+ * @author Elai
+ */
+
+//Here we import the needed packages to use the scanner
+import java.util.Scanner;
+
+class Main {
+
+
+   /**     
+   * This method will ask for inputs and calculate a total, which is printed for the user.
+   * @param integer of 0, the placeholder for the total value
+   * @return void
+   */
+
+  public static void sumOfInputs(int total){
+
+
+    //Opening up the scanner and asking for inputs
+    Scanner scan = new Scanner(System.in);
+    System.out.println("Enter a series of integers. Press 'q' to quit.");
+
+    //Run a while loop to continue asking for inputs until broken.
+    while (true){
+
+      //While there is an integer inputted, the program will scan it and add it to the total value.
+      while (scan.hasNextInt() == true){
+        int number = scan.nextInt();
+        total += number;
+        }
+
+      //If there is a string inputted, this if else statement will run.
+      if (scan.hasNextLine()){
+        String word = scan.next();
+        //Assign the line to a variable word.
+
+        //Checks if the user input is "q", if so, will print the total and break the loop, ending the program.
+        if (word.equals("q")){
+          System.out.println("The total is " + total);
+          break;
+        }
+
+        //If any other string is inputted, the loop will continue, waiting for new user inputs.
+        else{
+            continue;
+        }
+      }
+    }
+    scan.close();
+    //Closes off the scanner down here, this will only happen once the method is finished (outside of the while loop)
+  }
+  
+  /**     
+   * 
+   * @param args the command line arguments
+   * @return void
+   */
+  
+  public static void main(String[] args) {
+
+    /**
+    Set variable total to 0, this will be our placeholder for the final total. It is outside of the method, in this case, to prevent it from being reset in the while loop, and it provides a parameter for the method, allowing the user to even start from a different number (could start at an initial value of 20, not 0).
+    */
+    
+    int total = 0;
+
+    //Call on the method here, this begins our program.
+    sumOfInputs(total);
+  }
+}
