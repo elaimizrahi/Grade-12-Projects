@@ -1,0 +1,879 @@
+
+/**
+ * @author Elai
+ */
+
+import java.util.*;
+import java.io.*;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import static java.awt.event.KeyEvent.*;
+import javax.swing.border.Border;
+//importing all libraries that will be used
+
+public class Main extends JFrame {
+  JFrame frame = new JFrame("Connect 4!");
+  JLabel scoreLabel = new JLabel("CONNECT 4");
+  JButton resetBoard = new JButton("New Board");
+  JButton resetScore = new JButton("Reset Score");
+  JPanel panel = new JPanel();
+  JPanel sideBar = new JPanel();
+  JPanel background = new JPanel();
+  JLabel score = new JLabel();
+  JPanel scorePanel = new JPanel();
+  JPanel winPanel = new JPanel();
+  JLabel winLabel = new JLabel();
+  
+  JLabel turnLabel = new JLabel();
+  JPanel turnPanel = new JPanel();
+  JPanel imagePanel = new JPanel();
+  JPanel imagePanelBorder = new JPanel();
+  
+  JLabel rules = new JLabel();
+  JLabel rule1 = new JLabel();
+  JLabel rule2 = new JLabel();
+  JLabel rule3 = new JLabel();  
+  JPanel title = new JPanel();
+  //initialize most variables, these will be used throughout the entire program
+
+
+
+  //set up some imporant variables that can let us keep track of scores, turns, guesses, and so on
+  int guesses = 0;
+
+  final Color GOLD = new Color(255, 204, 51);
+  boolean yellowTurn = true;
+  boolean greenTurn = false;
+  boolean redTurn = false;
+  boolean threePlayerGame = false;
+
+  //here an array of buttons, panels, and integers are set up. Each one relates to the others and it models the game board and puts up the pieces needed
+  int[][] board = new int[8][8];
+  JButton[][] buttons = new JButton[8][8];
+  JPanel[][] squares = new JPanel[8][8];
+
+  //scores
+  int yellowScore = 0;
+  int redScore = 0;
+  int greenScore = 0;
+
+  //extra labels
+  JLabel red = new JLabel("Red team score: " + redScore);
+  JLabel yellow = new JLabel("Yellow team score: " + yellowScore);
+  JLabel green = new JLabel("Green team score: " + greenScore);
+
+  public Main() {
+    frame.setSize(800, 800);
+    frame.setLayout(null);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    //create frame
+
+    //create the main instructions page that is seen at the start
+    createInstructions();
+
+    frame.setVisible(true);
+  }
+
+  private void setTurnTwoPlayers() {
+    //this keeps track of turns and will update the panel that shows who's turn it is
+      if(yellowTurn){
+        yellowTurn = false;
+        redTurn = true; 
+        setTurnPanel();
+      }
+      else if (yellowTurn == false){
+        yellowTurn = true;
+        redTurn = false;
+        setTurnPanel();
+      }
+    
+  }
+
+  private void setTurnThreePlayers(){
+    //does the same as above but if threePlayerGame is true then it will run with three players
+    int count = 0;
+    if(threePlayerGame){      
+      System.out.println(count);
+
+      if (yellowTurn == true) {
+        yellowTurn = false;
+        redTurn = true; 
+        greenTurn = false;
+        setTurnPanel();
+        count++;
+      } 
+      System.out.println(count);
+      if (redTurn == true && count == 0) {
+        yellowTurn = false;
+        redTurn = false;
+        greenTurn = true;
+        setTurnPanel();
+        count++;
+      }      System.out.println(count);
+
+      if(greenTurn == true && count == 0) {
+        yellowTurn = true;
+        redTurn = false;
+        greenTurn = false;
+        setTurnPanel();
+        count++;
+      }
+      //the count is kept to avoid repeats, each section just changes who's turn is coming up
+    }
+  }
+
+  private void checkSpace(int x, int y) {
+    //this function takes in the location of where the player clicked and will find the lowest open spot to put a piece in
+
+    //if on the bottom row
+    if (y == 7) {
+      changeButton(x, y);
+    }
+
+    //if the value of the array is 0, will run through each one under the clicked spot and when there is a value > 0, will go back one space to place the piece
+    if ((board[x][y]) == 0) {
+      for (int i = 0; i < 7 - y; i++) {
+        System.out.println(y + i);
+
+        if (y + i + 1 > 7) {
+          break;
+        }
+
+        if (board[x][y + i + 1] == 1 || board[x][y + i + 1] == 5 ||board[x][y + i + 1] == 11) {
+          y = y + i;
+          changeButton(x, y);
+          break;
+        }
+        if (board[x][y + i + 1] == 0) {
+          if (y + i + 1 == 7) {
+            y = y + i + 1;
+            changeButton(x, y);
+            break;
+          }
+        }
+        // make it check every item down until it finds the lowest filled box, then fill
+        // in the one above it
+      }
+    }
+
+  }
+
+  private void changeButton(int x, int y) {
+    
+    //when the open spot is found, this function changes its colour from white to the player's colour.
+    if (yellowTurn) {
+      (squares[x][y]).setBackground(Color.YELLOW);
+      board[x][y] = 1;
+      frame.remove(buttons[x][y]);
+      
+      //has an extra section that will check if it is a two or three player game, which affects who's turn is next
+      if(threePlayerGame){
+        setTurnThreePlayers();
+      }
+      else{
+        setTurnTwoPlayers();
+      }
+      
+      boolean result = winCondition(board, 1, x, y);
+      //this checks if the player won after placing the piece, either returning true or false
+
+      //calls the function that updates the sidebar
+      setSidebar(result, 1, buttons);
+
+      //if there is a win, updates the score and ends the game
+      if (result) {
+        yellowScore++;
+        setScore(yellowScore, redScore, greenScore, result);
+      }
+
+    } 
+
+    //the other functions below do the same thing for red and green
+      
+    else if (redTurn == true) {
+      (squares[x][y]).setBackground(Color.RED);
+      board[x][y] = 5;
+      frame.remove(buttons[x][y]);
+      if(threePlayerGame){
+        setTurnThreePlayers();
+      }
+      else{
+        setTurnTwoPlayers();
+      }    
+      boolean result = winCondition(board, 5, x, y);
+      setSidebar(result, 5, buttons);
+      if (result) {
+        redScore++;
+        setScore(yellowScore, redScore, greenScore, result);
+      }
+
+    }    
+    else if (greenTurn == true) {
+
+      (squares[x][y]).setBackground(Color.GREEN);
+      board[x][y] = 11;
+      frame.remove(buttons[x][y]);
+
+      setTurnThreePlayers();      
+      boolean result = winCondition(board, 11, x, y);
+      setSidebar(result, 11, buttons);
+      if (result) {
+        greenScore++;
+        setScore(yellowScore, redScore, greenScore, result);
+      }
+    }
+  }
+
+  private boolean winCondition(int[][] board, int player, int x, int y) {
+    //larger function that can be called on to check the entire board for a win
+    if (checkVertical(board, player, x)) {
+      return true;
+    }
+    if (checkHorizontal(board, player, y)) {
+      return true;
+    }
+
+    if (checkDiagonal1(board, player)) {
+      return true;
+    }
+
+    if (checkDiagonal2(board, player)) {
+      return true;
+    } else
+      return false;
+
+  }
+
+  private boolean checkVertical(int[][] board, int player, int x) {
+
+    //checks the vertical components, quickly checking through the possible wins
+    for (int i = 3; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[j][i - 3] + board[j][i - 2] + board[j][i - 1] + board[j][i] == (player * 4))
+          return true;
+      }
+    }
+    //will either return true or false
+    return false;
+  }
+
+  private boolean checkHorizontal(int[][] board, int player, int y) {
+
+    //same as checkVertical but will look at all horizontal possibilities
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[i][j] + board[i + 1][j] + board[i + 2][j] + board[i + 3][j] == (player * 4)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+
+  }
+
+  private boolean checkDiagonal1(int[][] board, int player) {
+    //same as checkVertical but will look at all diagonal possibilities going on one angle
+
+    for (int i = 3; i < 8; i++) {
+      for (int j = 0; j < 5; j++) {
+        if (board[i][j] + board[i - 1][j + 1] + board[i - 2][j + 2] + board[i - 3][j + 3] == (player * 4))
+          return true;
+
+      }
+    }
+
+    return false;
+  }
+
+  private boolean checkDiagonal2(int[][] board, int player) {
+    //same as checkVertical but will look at all diagonal possibilities but angled the other way
+
+    for (int i = 3; i < 8; i++) {
+      for (int j = 0; j < 5; j++) {
+        if (board[i - 3][j] + board[i - 2][j + 1] + board[i - 1][j + 2] + board[i][j + 3] == (player * 4))
+          return true;
+
+      }
+    }
+
+    return false;
+
+  }
+
+  private void setSidebar(boolean result, int player, JButton buttons[][]) {
+    //this checks if there is a win, if so checks the player and runs the setWin function for that player
+    if (result) {
+      if (player == 1) {
+        setWin(1, buttons);
+      }
+      if (player == 5) {
+        setWin(5, buttons);
+      }
+      if(player == 7){
+        setWin(11, buttons);
+      }
+    }
+
+  }
+
+  public void setWin(int player, JButton buttons[][]) {
+    //this is what happens when a player wins, pausing the board and updating score
+    winPanel.setVisible(true);
+    winPanel.setBounds(0, 0, 100, 40);
+
+    //gets rid of all buttons to avoid any more presses
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        frame.remove(buttons[i][j]);
+      }
+    }
+
+    //checks again which player won, and will display a message that they won above the scoreboard and in their players colour
+    if(player == 1){
+      yellowTurn = true;
+      redTurn = false;
+      greenTurn = false;
+      setTurnPanel();
+      winLabel.setText("Yellow Wins!");
+      winLabel.setForeground(GOLD);
+      winLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+      winPanel.add(winLabel);
+      sideBar.add(winPanel);
+
+    }
+
+    if(player == 5){
+      yellowTurn = false;
+      redTurn = true;
+      greenTurn = false;
+      setTurnPanel();
+      winLabel.setText("Red Wins!");
+      winLabel.setForeground(Color.RED);
+      winLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+      winPanel.add(winLabel);
+      sideBar.add(winPanel);
+    }
+
+    if(player == 7){
+      yellowTurn = false;
+      redTurn = false;
+      greenTurn = true;
+      setTurnPanel();
+      winLabel.setText("Green Wins!");
+      winLabel.setForeground(Color.GREEN);
+      winLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+      winPanel.add(winLabel);
+      sideBar.add(winPanel);      
+    }
+
+    
+  }
+  
+  private void resetScore(){
+    //This is used for the reset score button, and calls on other functions to be done efficiently
+    //resets points, turns, turn panel, and calls the function that clears the board and makes a new one
+    greenTurn = false;
+    redTurn = false;
+    yellowTurn = true;
+    greenScore = 0;
+    redScore = 0;
+    yellowScore = 0;
+    
+    setTurnPanel();
+    startNewGame();
+    setScore(yellowScore, redScore, greenScore, true);
+  }
+
+  private void setScore(int yellowScore, int redScore, int greenScore, boolean result) {
+    //this updates the score and the label on the sidebar 
+
+    //checks if there are three players and the green score needs to be updated
+    if(threePlayerGame){
+      green.setText("Green: " + greenScore + " point(s)");
+      green.setBounds(100, 700, 250, 200);
+    }
+
+    //will always update the red and yellow score
+    
+    red.setText("Red: " + redScore + " point(s)");
+    red.setBounds(20, 10, 200, 200);
+
+    yellow.setText("Yellow: " + yellowScore + " point(s)");
+    yellow.setBounds(20, 40, 200, 200);
+    scorePanel.setBounds(40, 100, 200, 100);
+    scorePanel.add(red);
+    scorePanel.add(yellow);
+    frame.add(scorePanel);
+    scorePanel.revalidate();
+    scorePanel.repaint();
+  }
+
+
+  private void startNewGame(){ 
+    //this function creates a new game any time it may be needed
+    
+    //resets turn and score panel here
+    yellowTurn = true;
+    setTurnPanel();
+    score.setText(null);
+    winPanel.setVisible(false);
+    frame.add(scorePanel);
+
+
+    //resets the board and colours of spots
+    for (int i = 0; i < 8; i++){
+      for (int j = 0; j< 8; j++){        
+        board[i][j] = 0;        
+        buttons[i][j].setBackground(Color.WHITE);
+        buttons[i][j].setEnabled(true);
+        squares[i][j].setBackground(Color.WHITE);
+        frame.add(buttons[i][j]);
+      }
+    }
+
+    //resets all buttons
+    for (int i = 1; i < 8; i++){
+      for(int j = 0; j < 8; j++){
+        buttons[j][i].setEnabled(false);
+        frame.add(buttons[j][i]);
+      }
+    }
+
+  }
+
+  private void setTurnPanel(){
+
+    //this function checks which player is up next and updates the current turn panel
+
+    //first checks if it is a two player game, and will run two different orders depending on the number
+    System.out.println(greenTurn);
+    if(threePlayerGame == false){
+      if(yellowTurn){
+      imagePanel.setBounds(200,295,50,50);
+      imagePanel.setBackground(Color.YELLOW);
+      frame.add(imagePanel);
+    
+      imagePanelBorder.setBounds(195,290,60,60);
+      imagePanelBorder.setBackground(Color.BLUE);
+      frame.add(imagePanelBorder);
+    }
+      
+    else if (redTurn){
+      imagePanel.setBounds(200,295,50,50);
+      imagePanel.setBackground(Color.RED);
+      frame.add(imagePanel);
+    
+      imagePanelBorder.setBounds(195,290,60,60);
+      imagePanelBorder.setBackground(Color.BLUE);
+      frame.add(imagePanelBorder);
+    }
+    }
+        
+    else if(greenTurn){
+      System.out.println("hi");
+      imagePanel.setBounds(200,295,50,50);
+      imagePanel.setBackground(Color.GREEN);
+      frame.add(imagePanel);
+    
+      imagePanelBorder.setBounds(195,290,60,60);
+      imagePanelBorder.setBackground(Color.BLUE);
+      frame.add(imagePanelBorder);
+    }
+    
+    else if(yellowTurn){
+      imagePanel.setBounds(200,295,50,50);
+      imagePanel.setBackground(Color.YELLOW);
+      frame.add(imagePanel);
+    
+      imagePanelBorder.setBounds(195,290,60,60);
+      imagePanelBorder.setBackground(Color.BLUE);
+      frame.add(imagePanelBorder);
+    }
+      
+    else if (redTurn){
+      imagePanel.setBounds(200,295,50,50);
+      imagePanel.setBackground(Color.RED);
+      frame.add(imagePanel);
+    
+      imagePanelBorder.setBounds(195,290,60,60);
+      imagePanelBorder.setBackground(Color.BLUE);
+      frame.add(imagePanelBorder);
+    }
+  }
+  
+
+  private void createGameBoard(){
+    //this function loads up the entire game board
+    frame.setSize(800, 800);
+    frame.setLayout(null);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    
+    //title panel
+    title.setBounds(350, 15, 400, 60);
+    title.setBackground(Color.WHITE);
+    frame.add(title);
+
+    //creates the board of squares
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        JPanel square = new JPanel();
+        squares[i][j] = square;
+        square.setLocation(350 + i * 50, 90 + j * 50);
+        square.setSize(47, 47);
+        square.setBackground(Color.WHITE);
+        frame.add(square);
+      }
+    }
+
+    //creates all board elements below
+    panel.setBounds(300, 10, 490, 525);
+    panel.setBackground(Color.BLUE);
+    frame.add(panel);
+
+    System.out.println(redScore);
+    red.setText("Red: " + redScore + " point(s)");
+    red.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+    red.setBounds(100, 10, 250, 200);
+
+
+    yellow.setText("Yellow: " + yellowScore + " point(s)");
+    yellow.setBounds(100, 40, 250, 200);
+    yellow.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+    scorePanel.setBounds(40, 100, 200, 100);
+    scorePanel.setBackground(Color.WHITE);
+    scorePanel.add(red);
+    scorePanel.add(yellow);
+    frame.add(scorePanel);
+    
+    imagePanel.setBounds(200,295,50,50);
+    imagePanel.setBackground(Color.YELLOW);
+    frame.add(imagePanel);
+    
+    imagePanelBorder.setBounds(195,290,60,60);
+    imagePanelBorder.setBackground(Color.BLUE);
+    frame.add(imagePanelBorder);
+    
+
+    
+    turnPanel.setBounds(10, 300, 200, 75);
+    turnPanel.setBackground(Color.WHITE);
+    turnLabel.setText("Current turn: ");
+    turnLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+    turnPanel.add(turnLabel);
+    frame.add(turnPanel);
+
+
+    rules.setText("RULES: ");
+    rules.setFont(new Font("SansSerif", Font.BOLD, 25));
+    rules.setBounds(30, 350, 200, 100);
+    frame.add(rules);    
+    
+    
+    rule1.setText("1. Drop pieces from top row");
+    rule1.setFont(new Font("SansSerif", Font.BOLD, 12));
+    rule1.setBounds(30, 425, 250, 20);
+    frame.add(rule1);  
+    
+    
+    rule2.setText("<html>2. Win by making a vertical,<br /> horizontal, or diagonal row of 4 <html>");
+    rule2.setFont(new Font("SansSerif", Font.BOLD, 12));
+    rule2.setBounds(30, 430, 285, 100);
+    frame.add(rule2);    
+    
+
+    // side bar with score, turn, quick instructions
+    sideBar.setBounds(10, 10, 280, 525);
+    sideBar.setBackground(Color.WHITE);
+    frame.add(sideBar);
+
+    // new game button
+    resetBoard.setBounds(475, 600, 150, 75);
+    resetBoard.setFont(new Font("SansSerif", Font.BOLD, 17));
+    resetBoard.setBackground(Color.WHITE);
+    resetBoard.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            // Prints the message when the button is clicked
+            startNewGame();
+
+          }
+        });
+    frame.add(resetBoard);
+
+
+
+    // reset score button
+    resetScore.setBounds(75, 600, 150, 75);
+    resetScore.setFont(new Font("SansSerif", Font.BOLD, 17));
+    resetScore.setBackground(Color.WHITE);
+    resetScore.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // Prints the message when the button is clicked
+        resetScore();
+
+        }
+      });
+    frame.add(resetScore);
+
+    //The "score" label
+    scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 50));
+    scoreLabel.setForeground(Color.BLACK);
+    title.add(scoreLabel);
+
+    //background
+    background.setBounds(0, 0, 800, 800);
+    background.setBackground(Color.LIGHT_GRAY);
+
+    //creating board of buttons that will run the checkSpace function every time they are clicked
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        JButton button = new JButton();
+        buttons[i][j] = button;
+        button.setLocation(350 + i * 50, 90 + j * 50);
+        button.setSize(48, 48);
+        button.setBackground(Color.WHITE);
+        squares[i][j].setBackground(Color.WHITE);
+        frame.add(button);
+
+        button.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            // Prints the message when the button is clicked
+            int x = 0;
+            int y = 0;
+            for (int i = 0; i < 8; ++i) {
+              for (int j = 0; j < 8; ++j) {
+                if (buttons[i][j] == button) {
+                  x = i;
+                  y = j;
+                }
+              }
+            }
+
+            checkSpace(x, y);
+
+          }
+        });
+
+      }
+
+    }
+
+    //only allows top row of buttons
+    for (int i = 1; i < 8; i++){
+      for(int j = 0; j < 8; j++){
+        buttons[j][i].setEnabled(false);
+        frame.add(buttons[j][i]);
+      }
+    }
+
+    //create the instructions button
+    JButton instructions = new JButton("Instructions");
+    instructions.setBounds(275, 600, 150, 75);
+    instructions.setFont(new Font("SansSerif", Font.BOLD, 17));
+    instructions.setBackground(Color.WHITE);
+    instructions.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            //resets game when clicked
+            startNewGame();
+            //removes all board elements before using the create instructions function
+            frame.remove(rule1);
+            frame.remove(rule2);
+            frame.remove(sideBar);
+            frame.remove(rules);
+            frame.remove(turnPanel);
+            frame.remove(imagePanel);
+            frame.remove(scorePanel);
+            frame.remove(panel);
+            for (int i = 0; i < 8; i++) {
+              for (int j = 0; j < 8; j++) {
+                frame.remove(squares[i][j]);
+              }
+            }      
+                
+            for (int i = 0; i < 8; i++){
+              for(int j = 0; j < 8; j++){
+                buttons[i][j].setEnabled(false);
+                frame.remove(buttons[i][j]);
+                board[i][j] = 0;
+              }
+            }
+            for (int i = 0; i < 8; i++){
+              for(int j = 0; j < 8; j++){
+                buttons[i][j].setEnabled(false);
+                frame.remove(buttons[i][j]);
+              }
+            }
+            frame.remove(title);
+            frame.remove(background);
+            frame.remove(imagePanelBorder);
+            frame.remove(scoreLabel);
+            frame.remove(resetScore);
+            frame.remove(resetBoard);
+            frame.remove(instructions);
+            createInstructions();
+            frame.revalidate();
+            frame.repaint();
+          }
+        });    
+    //updates the frame to avoid graphics issues
+    frame.setVisible(true);
+    frame.revalidate();
+    frame.repaint();    
+    frame.add(instructions);
+    frame.add(background);
+  }
+
+  private void createThreePlayerGame(){
+    //function that is called if player presses three player game, just changes threePlayerGame to true for later on, creates the board, and adds green to the score panel
+    threePlayerGame = true;
+    createGameBoard();
+
+    
+    green.setText("Green: " + greenScore + " point(s)");
+    green.setBounds(100, 700, 250, 200);
+    green.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+    scorePanel.add(green);
+    scorePanel.add(red);
+    scorePanel.add(yellow);
+    scorePanel.revalidate();
+    scorePanel.repaint();
+    
+  }
+
+  private void createInstructions(){
+    //creates the instructions screen that is seeen at the start of the game
+    frame.setSize(800,800);
+
+    //adds panels and labels that include the rules and title
+    JPanel background = new JPanel();
+    background.setBounds(0,0,800,800);
+    background.setBackground(Color.BLUE);
+
+    JLabel title = new JLabel();
+    title.setBounds(225, 0, 400, 200);
+    title.setText("Connect Four!");
+    title.setForeground(Color.WHITE);
+    title.setFont(new Font("SansSerif", Font.BOLD, 50));
+    frame.add(title);
+    
+    JLabel instructionsTitle = new JLabel();
+    instructionsTitle.setBounds(100, 140, 400, 100);
+    instructionsTitle.setText("Instructions");
+    instructionsTitle.setForeground(Color.WHITE);
+    instructionsTitle.setFont(new Font("SansSerif", Font.BOLD, 30));
+
+    JLabel rule1 = new JLabel();
+    rule1.setBounds(100, 200, 700, 100);
+    rule1.setText("1: Drop pieces from the top row on your turn");
+    rule1.setForeground(Color.WHITE);
+    rule1.setFont(new Font("SansSerif", Font.BOLD, 20));
+    frame.add(rule1);    
+    
+    JLabel rule2 = new JLabel();
+    rule2.setBounds(100, 275, 700, 100);
+    rule2.setText("2: Win by creating a row of 4 chips of your colour");
+    rule2.setForeground(Color.WHITE);
+    rule2.setFont(new Font("SansSerif", Font.BOLD, 20));
+    frame.add(rule2);    
+    
+    JLabel rule3 = new JLabel();
+    rule3.setBounds(100, 350, 700, 100);
+    rule3.setText("3: The row can be vertical, horizontal, or diagonal");
+    rule3.setForeground(Color.WHITE);
+    rule3.setFont(new Font("SansSerif", Font.BOLD, 20));
+    frame.add(rule3);    
+    
+    JLabel rule4 = new JLabel();
+    rule4.setBounds(100, 425, 700, 100);
+    rule4.setText("4: Select number of players");
+    rule4.setForeground(Color.WHITE);
+    rule4.setFont(new Font("SansSerif", Font.BOLD, 20));
+    frame.add(rule4);
+
+    JLabel rule5 = new JLabel();
+    rule5.setBounds(100, 500, 700, 100);
+    rule5.setText("5: Use 'Reset Board' or 'Reset Score' to play again!");
+    rule5.setForeground(Color.WHITE);
+    rule5.setFont(new Font("SansSerif", Font.BOLD, 20));
+    frame.add(rule5);
+
+
+    //creating the two buttons on the bottom (two player, threeplayer)
+    JButton button2 = new JButton();
+    button2.setBounds(100,600,200,100);
+
+
+    frame.add(instructionsTitle);
+    
+    JButton button = new JButton();
+    button.setBounds(500,600,200,100);
+    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        //when clicked the button gets rid of instructions and creates game board for two players
+        frame.remove(title);
+        frame.remove(rule1);
+        frame.remove(rule2);
+        frame.remove(rule3);
+        frame.remove(rule4);
+        frame.remove(rule5);
+        frame.remove(button);
+        frame.remove(button2);
+        frame.remove(instructionsTitle);
+        frame.remove(background);
+        threePlayerGame = false;
+        scorePanel.remove(green);
+        createGameBoard();
+        frame.revalidate();
+        frame.repaint();
+        }
+      });    
+    
+    button2.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        //gets rid of instrcutions and creates the game board for three players
+        frame.remove(title);
+        frame.remove(rule1);
+        frame.remove(rule2);
+        frame.remove(rule3);
+        frame.remove(rule4);
+        frame.remove(rule5);
+        frame.remove(button);
+        frame.remove(button2);
+        frame.remove(instructionsTitle);
+        frame.remove(background);
+        createThreePlayerGame();
+        frame.revalidate();
+        frame.repaint();
+        }
+      });
+    //adding labels to the buttons and adding the buttons the frame
+    JLabel twoPlayers = new JLabel();
+    twoPlayers.setText("Two Players");
+    twoPlayers.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+    button.add(twoPlayers);
+    
+    JLabel threePlayers = new JLabel();
+    threePlayers.setText("Three Players");
+    threePlayers.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+    button2.add(threePlayers);
+
+
+
+    frame.add(button2);
+    frame.add(button);
+    frame.add(background);
+  }
+
+
+  //calling the main string args
+  public static void main(String[] args) {
+    Main main = new Main();
+  }
+}
