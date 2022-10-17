@@ -1,0 +1,92 @@
+/**
+* @author Elai
+*/
+
+//we must import the needed java libraries, allows for exception handling and basic methods.
+
+import java.util.*;
+import java.io.*;
+
+class Main {
+
+
+  /**     
+   * This method will take in the name of a file, check if it is a file, and if so, create a new file that is identical, but reversed. 
+   * @param filename
+   * @return void
+   * @throws java.io.IOException
+  */
+
+  public static void reverseFile(String filename) throws IOException {
+    //creates a new method, which we start with a try/catch statement to prevent IOExceptions
+    
+    try{
+      
+      //open up the file that had its name put in, will use this to scan the file
+      File filein = new File (filename); // variable name? 
+      Scanner scanner = new Scanner(filein);
+      //above we open the scanner that will scan the original file
+      
+      String reverseName = "";
+      String sentences = "";
+      String reversedSentences = "";
+      //Set up empty strings that will hold the new file name, each line of the file, and eventually the reversed string that will be printed
+
+      for (int i = filename.length()-5; i >=0; i--){
+        reverseName = reverseName + filename.charAt(i);
+      } 
+      /*
+      For loop will go backwards, taking each character and putting it into the empty string to eventually build a new, reversed string that will be the file name. 
+      We must do -5 as well to remove the .txt part, if we dont then we will get index number issues.
+      */
+      
+      FileWriter fileout = new FileWriter(reverseName + ".txt"); // variable name?? 
+      BufferedWriter buffer = new BufferedWriter(fileout);
+      //Creates a new file with the name reversed, plus .txt to make a text file
+  
+
+      
+      while (scanner.hasNextLine()){
+        sentences = sentences + scanner.nextLine() + "\n"; 
+      }
+      //creates a string (sentences) that is each line within the file
+
+      for(int i = sentences.length()-1; i >= 0; i--){
+        reversedSentences = reversedSentences + sentences.charAt(i);
+      }
+      //takes each line within the file and flips the characters front to back the same way that was done with the file name, and assigns it to a string
+      
+      buffer.write(reversedSentences);
+      //Uses the buffer to write the final reversed string into the file
+
+      scanner.close();
+      if(buffer != null) buffer.close();
+      //close the scanner and buffer, which we must do
+
+      
+    } catch (IOException exception){
+      System.out.println("Something is wrong with the file.");
+    }
+    //Catch statement to prevent IOExceptions, which are exceptions within the file and with reading the file. 
+  }
+
+
+
+    /**     
+   * @param args the command line arguments
+   * @return void
+   */
+  
+  public static void main(String[] args) {
+    try{
+      
+      //Within our main arguments, calls upon the method for the romeo and juliet file
+      reverseFile("romeoAndJuliet.txt");
+      
+    } catch (IOException exception) {
+      System.out.println("Something is wrong with the file.");
+    }
+    //Another catch statement to prevent IOExceptions within the main arguments, avoiding any issues with the file from ruining the program
+  }
+}
+//close off the program
